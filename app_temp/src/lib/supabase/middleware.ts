@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { UserRole } from '@/types/auth'
+import { checkAuthorization } from '@/lib/auth-utils'
 
 const ROLE_ROUTES: Record<string, UserRole> = {
   '/admin': 'admin',
@@ -58,10 +59,7 @@ export async function updateSession(request: NextRequest) {
     userRole = profile?.role
   }
 
-  // 2. Import auth-utils dynamically to avoid edge runtime issues if needed, or just use the logic
-  // Actually, let's just do it cleanly. We can't import node-specific things in edge, but auth-utils has no node dependencies.
-  const { checkAuthorization } = await import('@/lib/auth-utils')
-  
+
   const redirectDestination = checkAuthorization(user?.id, userRole, pathname)
 
   if (redirectDestination) {
